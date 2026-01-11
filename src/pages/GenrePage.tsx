@@ -1,5 +1,5 @@
 import { useParams, Link } from 'react-router-dom';
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 import Header from '@/components/Header';
 import MovieCard from '@/components/MovieCard';
 import { Button } from '@/components/ui/button';
@@ -7,15 +7,30 @@ import { genres, languages, getMoviesByGenre } from '@/data/mockMovies';
 
 const GenrePage = () => {
   const { genreId } = useParams<{ genreId: string }>();
-  const [selectedLanguage, setSelectedLanguage] = useState<string | null>(null);
+  const [selectedLanguages, setSelectedLanguages] = useState<string[]>([]);
+
+  // Scroll to top when genre changes
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [genreId]);
+
+  const toggleLanguage = (lang: string) => {
+    setSelectedLanguages(prev => 
+      prev.includes(lang) 
+        ? prev.filter(l => l !== lang)
+        : [...prev, lang]
+    );
+  };
 
   const genre = genres.find((g) => g.id === genreId);
   const movies = useMemo(() => getMoviesByGenre(genreId || ''), [genreId]);
 
   const filteredMovies = useMemo(() => {
-    if (!selectedLanguage) return movies;
-    return movies.filter((m) => m.availableLanguages.includes(selectedLanguage));
-  }, [movies, selectedLanguage]);
+    if (selectedLanguages.length === 0) return movies;
+    return movies.filter((m) => 
+      selectedLanguages.some(lang => m.availableLanguages.includes(lang))
+    );
+  }, [movies, selectedLanguages]);
 
   const moviesByYear = useMemo(() => {
     const grouped: Record<number, typeof movies> = {};
@@ -70,23 +85,38 @@ const GenrePage = () => {
         <div className="container mx-auto px-4">
           <div className="flex items-center gap-2 overflow-x-auto scrollbar-hide">
             <Button
-              variant={!selectedLanguage ? 'gold' : 'cinema'}
+              variant={selectedLanguages.length === 0 ? 'gold' : 'cinema'}
               size="sm"
-              onClick={() => setSelectedLanguage(null)}
+              onClick={() => setSelectedLanguages([])}
             >
               All Languages
             </Button>
             {languages.map((lang) => (
               <Button
                 key={lang}
-                variant={selectedLanguage === lang ? 'gold' : 'cinema'}
+                variant={selectedLanguages.includes(lang) ? 'gold' : 'cinema'}
                 size="sm"
-                onClick={() => setSelectedLanguage(lang)}
+                onClick={() => toggleLanguage(lang)}
               >
                 {lang}
+                {selectedLanguages.includes(lang) && ' ✓'}
               </Button>
             ))}
           </div>
+          {selectedLanguages.length > 0 && (
+            <div className="flex items-center gap-2 mt-2 text-sm text-muted-foreground">
+              <span>Selected:</span>
+              {selectedLanguages.map(lang => (
+                <span key={lang} className="text-primary">{lang}</span>
+              ))}
+              <button 
+                onClick={() => setSelectedLanguages([])}
+                className="text-xs text-muted-foreground hover:text-foreground ml-2"
+              >
+                Clear all
+              </button>
+            </div>
+          )}
         </div>
       </section>
 
