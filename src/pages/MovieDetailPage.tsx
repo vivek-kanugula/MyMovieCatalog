@@ -56,10 +56,26 @@ const MovieDetailPage = () => {
         </div>
 
         <div className="relative container mx-auto px-4 pt-8">
-          <Link to="/" className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors mb-8">
-            <ArrowLeft className="h-4 w-4" />
-            Back to Home
-          </Link>
+          <div className="flex flex-wrap items-center gap-4 mb-8">
+            <Link to="/" className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors">
+              <ArrowLeft className="h-4 w-4" />
+              Home
+            </Link>
+            <span className="text-muted-foreground">|</span>
+            {movie.genre.slice(0, 2).map((g) => {
+              const genreInfo = genres.find(genre => genre.id === g);
+              return genreInfo ? (
+                <Link 
+                  key={g} 
+                  to={`/genre/${g}`}
+                  className="inline-flex items-center gap-1 text-muted-foreground hover:text-primary transition-colors"
+                >
+                  <Tag className="h-3 w-3" />
+                  {genreInfo.name}
+                </Link>
+              ) : null;
+            })}
+          </div>
 
           <div className="flex flex-col md:flex-row gap-8 pt-8">
             {/* Poster */}
