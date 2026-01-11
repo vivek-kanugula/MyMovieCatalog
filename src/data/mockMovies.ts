@@ -270,11 +270,11 @@ export const getRandomMovies = (count: number) => {
   return shuffled.slice(0, count);
 };
 
-export const searchMovies = (query: string, filters?: { language?: string; genre?: string }) => {
+export const searchMovies = (query: string, filters?: { languages?: string[]; genres?: string[] }) => {
   return movies.filter(movie => {
     const matchesQuery = movie.title.toLowerCase().includes(query.toLowerCase());
-    const matchesLanguage = !filters?.language || movie.availableLanguages.includes(filters.language);
-    const matchesGenre = !filters?.genre || movie.genre.includes(filters.genre);
+    const matchesLanguage = !filters?.languages?.length || filters.languages.some(lang => movie.availableLanguages.includes(lang));
+    const matchesGenre = !filters?.genres?.length || filters.genres.some(genre => movie.genre.includes(genre));
     return matchesQuery && matchesLanguage && matchesGenre;
   });
 };
